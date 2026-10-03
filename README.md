@@ -20,7 +20,7 @@
 
 <br>
 
-### 🎮 [PLAY THE GAME](#-getting-started) · 👁️ [EXPLORE THE CODE](https://github.com/Punitpritam788/toybox-exe)
+### 🎮 [PLAY THE GAME](https://punitpritam788.github.io/toybox-exe/) · 👁️ [EXPLORE THE CODE](https://github.com/Punitpritam788/toybox-exe)
 
 </div>
 
