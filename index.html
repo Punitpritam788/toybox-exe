@@ -1,7 +1,7 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>TOYBOX.EXE</title>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"><title>TOYBOX.EXE</title>
 <style>
 :root{--g:#7dff9a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-html,body{height:100%;margin:0;background:#000;color:var(--g);font-family:'Courier New',Courier,monospace;overflow:hidden}
+html,body{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;height:100%;margin:0;background:#000;color:var(--g);font-family:'Courier New',Courier,monospace;overflow:hidden}
 #c{position:fixed;inset:0;width:100%;height:100%;image-rendering:pixelated;filter:grayscale(1) sepia(1) hue-rotate(78deg) saturate(3.2) brightness(1.35) contrast(1.2)}
 .fx{position:fixed;inset:0;pointer-events:none}
 #vig{background:radial-gradient(ellipse at center,transparent 45%,rgba(0,12,4,.8) 100%)}
@@ -30,11 +30,20 @@ button{margin-top:16px;background:#031;color:var(--g);border:2px solid var(--g);
 .gl{animation:gj .12s steps(2) infinite}@keyframes gj{50%{transform:translate(-4px,2px);color:#f33}}
 #rec{position:fixed;right:18px;top:calc(14px + env(safe-area-inset-top,0px));color:#f33;font-size:15px;text-shadow:0 0 6px #f00;animation:fl 2s infinite}
 #boot{white-space:pre-wrap;text-align:left;max-width:700px;font-size:14px;line-height:1.5;min-height:330px;text-shadow:0 0 6px var(--g)}
+#tc{position:fixed;inset:0;z-index:8}
+#jb{position:fixed;width:120px;height:120px;border:2px solid var(--g);border-radius:50%;opacity:.35;left:calc(18px + env(safe-area-inset-left,0px));bottom:calc(26px + env(safe-area-inset-bottom,0px));background:rgba(0,20,8,.35)}
+#kn{position:absolute;left:35px;top:35px;width:50px;height:50px;border-radius:50%;background:rgba(125,255,154,.55);box-shadow:0 0 12px var(--g)}
+.tb{position:fixed;display:flex;align-items:center;justify-content:center;border:2px solid var(--g);border-radius:50%;background:rgba(0,20,8,.5);color:var(--g);font-weight:bold;text-shadow:0 0 6px var(--g);opacity:.7}.tb.on{background:var(--g);color:#000}
+#bE{width:78px;height:78px;right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(128px + env(safe-area-inset-bottom,0px));font-size:26px}
+#bQ{width:66px;height:66px;right:calc(110px + env(safe-area-inset-right,0px));bottom:calc(80px + env(safe-area-inset-bottom,0px));font-size:22px}
+#bR{width:70px;height:70px;right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(32px + env(safe-area-inset-bottom,0px));font-size:15px}
+@media (pointer:coarse){#hud{font-size:11px;line-height:1.5;padding:5px 8px}#obj{display:none}#prompt{bottom:34%;font-size:15px}#boot{font-size:12px;min-height:240px}.ov p{font-size:13px}#toast{font-size:15px}}
 </style></head><body>
 <canvas id="c"></canvas>
 <div id="blood" class="fx"><i class="dr"></i><i class="dr b"></i></div>
 <div id="vig" class="fx"></div><div id="scan" class="fx"></div><div id="grain" class="fx"></div>
 <div id="hud"></div><div id="err"></div><div id="rec">&#9679; REC</div><div id="prompt"></div><div id="toast"></div>
+<div id="tc" style="display:none"><div id="jb"><div id="kn"></div></div><div class="tb" id="bE">E</div><div class="tb" id="bQ">Q</div><div class="tb" id="bR">RUN</div></div>
 <div id="note" class="ov"><div id="nt"></div><small style="margin-top:14px">press E or click to close</small></div>
 <div id="scare"><canvas id="sf" width="512" height="512"></canvas></div>
 <div id="pause" class="ov" style="display:none;z-index:15"><h1>PAUSED</h1><small>click to resume</small></div>
@@ -131,6 +140,7 @@ function siren(){if(!A)return;const o=A.createOscillator(),g=A.createGain(),t=A.
 // game state
 let yaw=0,pitch=0,pl={x:0,z:W-3},bat=0,pgc=0,lives=3,charge=100,playing=false,reading=false,frozen=false,ended=false,open=false,inv=0,bl=0,hb=0,fk=0,nf=R(8,15),tt=0,tm,gT=0,gd=0,ng=R(5,9),ev=R(12,20),blk=0,fear=0,stam=100,stepT=1,dec=null,decN=3,panic=0,comp=0,t0=0;
 function decoy(){if(!playing||frozen||reading||decN<=0||dec)return;decN--;const m=new THREE.Mesh(new THREE.BoxGeometry(.5,.4,.5),L({color:0xffcc33,emissive:0xffaa00,emissiveIntensity:.8})),c=v=>Math.max(-W+1,Math.min(W-1,v));m.position.set(c(pl.x-Math.sin(yaw)*9),.3,c(pl.z-Math.cos(yaw)*9));sc.add(m);dec={m,t:7,x:m.position.x,z:m.position.z};toast('Decoy music box thrown. They follow the sound.',2200);if(A)for(let k=0;k<4;k++)setTimeout(plink,k*300)}
+const TOUCH=matchMedia("(pointer:coarse)").matches;
 const keys={},BF='grayscale(1) sepia(1) hue-rotate(78deg) saturate(3.2) brightness(1.35) contrast(1.2)',ERR=["I SEE YOU","SEGMENTATION FAULT","LILY IS BEHIND YOU","NORA.SAV CORRUPTED","DON'T LOOK AWAY","PLAYER 1 NOT FOUND","STOP RUNNING","0xDEADBEEF","YOU CANNOT LEAVE","LOADING TOY..."];
 function glitch(t){gT=Math.max(gT,t)}let et;function showErr(t,ms){const e=$('err');e.textContent=t;e.style.opacity=1;clearTimeout(et);et=setTimeout(()=>e.style.opacity=0,ms)}
 function event(){const r=Math.random();if(r<.3){blk=3;showErr('POWER FAILURE',1500);whisper();if(Math.random()<.5)laugh()}
@@ -138,7 +148,7 @@ function event(){const r=Math.random();if(r<.3){blk=3;showErr('POWER FAILURE',15
  else if(r<.82){showErr(ERR[Math.random()*ERR.length|0],1400);glitch(.4);whisper()}else scare(false)}
 function toast(s,ms=3000){const t=$('toast');t.textContent=s;t.style.opacity=1;clearTimeout(tm);tm=setTimeout(()=>t.style.opacity=0,ms)}
 function lock(){document.body.requestPointerLock&&document.body.requestPointerLock()}
-$('go').onclick=()=>{initAudio();lock();$('screen').style.display='none';playing=true;t0=performance.now();toast('Find 5 power cells. Read the pages. Watch the toys.',4500)};
+$('go').onclick=()=>{initAudio();lock();$('screen').style.display='none';playing=true;t0=performance.now();if(TOUCH){$('tc').style.display='block';try{const d=document.documentElement;Promise.resolve((d.requestFullscreen||d.webkitRequestFullscreen).call(d)).catch(()=>{});screen.orientation.lock('landscape').catch(()=>{})}catch(e){}if(innerHeight>innerWidth)setTimeout(()=>toast('Rotate your phone to landscape for best play',4000),4600)}toast('Find 5 power cells. Read the pages. Watch the toys.',4500)};
 document.addEventListener('pointerlockchange',()=>{if(playing&&!ended&&!document.pointerLockElement&&!reading)$('pause').style.display='flex';else $('pause').style.display='none'});
 $('pause').onclick=()=>{lock();$('pause').style.display='none'};
 addEventListener('mousemove',e=>{if(document.pointerLockElement&&playing&&!reading&&!frozen){yaw-=e.movementX*.0023;pitch=Math.max(-1.2,Math.min(1.2,pitch-e.movementY*.0023))}});
@@ -147,7 +157,7 @@ $('note').onclick=()=>{closeNote();lock()};
 function closeNote(){reading=false;$('note').style.display='none'}
 function readPage(i){reading=true;$('nt').innerHTML=PT[i];$('note').style.display='flex'}
 function scare(hurt){const q=$('sf').getContext('2d');for(let i=0;i<10;i++){const y=R(0,480);q.drawImage($('sf'),0,y,512,R(10,50),R(-60,60),y,512,40)}glitch(1);frozen=true;$('scare').style.display='flex';screech();setTimeout(()=>{$('scare').style.display='none';frozen=false;if(hurt){lives--;if(lives<=0)return end(false);pl.x=0;pl.z=W-3;yaw=0;inv=4;toys.forEach(t=>{if(Math.hypot(t.position.x-pl.x,t.position.z-pl.z)<18){const p={x:R(-W+3,W-3),z:R(-W+3,-4)};t.position.set(p.x,0,p.z)}});toast('It dragged you back to the start...')}},hurt?1100:420)}
-function end(win){ended=true;playing=false;document.exitPointerLock();const s=$('screen');s.style.display='flex';s.innerHTML=win?`<h1>EXIT.EXE</h1><p>You step through into white light. A desk. A monitor. Your hands rest on the keyboard, and they are cubes. On screen, one line blinks: <i>PLAYER 1 SAVED. LOADING LEVEL 8...</i> Behind the glass, small cone-hatted figures wave, and one of them is wearing your face.</p><p>Time: ${(performance.now()-t0)/1000|0}s · Pages: ${pgc}/4 · Lives left: ${lives} · Rank: ${lives==3&&pgc==4?'S':lives>=2?'A':'B'}</p><button onclick="location.reload()">PLAY AGAIN (NEW ROOM)</button>`:`<h1 style="color:#f33">SAVE OVERWRITTEN</h1><p>The toys fold around you, gentle now, and the lullaby restarts from the first note. Your arms stiffen into blocks. Your name drops out of the file, one letter at a time. Somewhere a CRT hums. Somewhere a new tester is being asked for a name.</p><button onclick="location.reload()">TRY AGAIN (NEW ROOM)</button>`}
+function end(win){$('tc').style.display='none';ended=true;playing=false;document.exitPointerLock();const s=$('screen');s.style.display='flex';s.innerHTML=win?`<h1>EXIT.EXE</h1><p>You step through into white light. A desk. A monitor. Your hands rest on the keyboard, and they are cubes. On screen, one line blinks: <i>PLAYER 1 SAVED. LOADING LEVEL 8...</i> Behind the glass, small cone-hatted figures wave, and one of them is wearing your face.</p><p>Time: ${(performance.now()-t0)/1000|0}s · Pages: ${pgc}/4 · Lives left: ${lives} · Rank: ${lives==3&&pgc==4?'S':lives>=2?'A':'B'}</p><button onclick="location.reload()">PLAY AGAIN (NEW ROOM)</button>`:`<h1 style="color:#f33">SAVE OVERWRITTEN</h1><p>The toys fold around you, gentle now, and the lullaby restarts from the first note. Your arms stiffen into blocks. Your name drops out of the file, one letter at a time. Somewhere a CRT hums. Somewhere a new tester is being asked for a name.</p><button onclick="location.reload()">TRY AGAIN (NEW ROOM)</button>`}
 function interact(){if(!playing||frozen)return;for(const p of peds)if(Math.hypot(pl.x-(W-3),pl.z-p.z)<2.4){p.st=(p.st+1)%3;p.t.geometry=pg[p.st];blip(300+p.st*100);if(peds.every((q,i)=>q.st==sol[i])){solved=true;plamp.material.color.set(0x66ff88);peds.forEach(q=>q.t.material.emissive.set(0x33ff66));toast('CLICK. The combination is accepted.');blip(900)}return}}
 function collide(){pl.x=Math.max(-W+1,Math.min(W-1,pl.x));pl.z=Math.max(open?-W-3:-W+1,Math.min(W-1,pl.z));obs.forEach(o=>{const dx=pl.x-o.x,dz=pl.z-o.z,d=Math.hypot(dx,dz),m=o.r+.4;if(d<m){pl.x=o.x+dx/d*m;pl.z=o.z+dz/d*m}})}
 const clock=new THREE.Clock();
@@ -155,7 +165,7 @@ function frame(){requestAnimationFrame(frame);const dt=Math.min(.05,clock.getDel
  bats.concat(fakes).forEach(b=>{b.g.rotation.y+=dt*2;b.g.position.y=1+Math.sin(tt*2+b.x)*.12});pages.forEach(p=>{p.g.rotation.y+=dt*1.5;p.g.position.y=1.1+Math.sin(tt*2+p.x)*.1});
  let danger=0,prompt='';
  if(playing&&!reading&&!frozen){
-  const f=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0),s=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0),mv=f||s,run=keys.ShiftLeft&&stam>3&&mv,sp=run?6.4:3.8;stam=run?Math.max(0,stam-dt*22):Math.min(100,stam+dt*(mv?9:16));stepT-=dt*(mv?(run?2.6:1.6):0);if(stepT<0){stepT=1;tap(.35,0,60)}
+  const f=-jy+(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0),s=jx+(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0),mv=f||s,run=(keys.ShiftLeft||jr||runB)&&stam>3&&mv,sp=run?6.4:3.8;stam=run?Math.max(0,stam-dt*22):Math.min(100,stam+dt*(mv?9:16));stepT-=dt*(mv?(run?2.6:1.6):0);if(stepT<0){stepT=1;tap(.35,0,60)}
   pl.x+=((-Math.sin(yaw))*f+Math.cos(yaw)*s)*sp*dt;pl.z+=((-Math.cos(yaw))*f-Math.sin(yaw)*s)*sp*dt;collide();
   cam.position.set(pl.x,1.6+(mv?Math.sin(tt*(sp>5?13:9))*.06:0),pl.z);
   charge=Math.max(0,charge-dt*.9);inv=Math.max(0,inv-dt);
@@ -191,6 +201,15 @@ function frame(){requestAnimationFrame(frame);const dt=Math.min(.05,clock.getDel
  const obj=bat<5?`Collect power cells (${bat}/5)`:!solved?'Copy Lily\'s shape order onto the east pedestals':!open?'Go to the door':'ESCAPE!';
  $('hud').innerHTML=`<span class="${fear>.5?'gl':''}">NORA.SAV${fear>.6?' [CORRUPT]':''}</span><br><b>CELLS</b> ${'▮'.repeat(bat)}${'▯'.repeat(5-bat)} ${bat}/5<br><b>PAGES</b> ${pgc}/4 &nbsp; <b>LIVES</b> <span class=r>${'♥'.repeat(lives)}</span><br><b>LIGHT</b> <span class=bar><i style="width:${charge}%"></i></span><br><b>STAMINA</b> <span class=bar><i style="width:${stam}%"></i></span><br><b>DECOYS [Q]</b> ${'♪'.repeat(decN)}<br><b>SHAPES</b> ${solved?'✔ solved':'✘ locked'}<div id=obj>▸ ${obj}</div>`;
  $('prompt').textContent=prompt;rend.render(sc,cam)}
+let jx=0,jy=0,jr=0,runB=0,jid=null,lid=null,jo,lp;
+(()=>{const tc=$('tc'),kn=$('kn'),jb=$('jb'),half=x=>x<innerWidth*.5;
+ tc.addEventListener('touchstart',e=>{for(const t of e.changedTouches){if(half(t.clientX)&&jid==null){jid=t.identifier;jo={x:t.clientX,y:t.clientY};jb.style.left=(jo.x-60)+'px';jb.style.top=(jo.y-60)+'px';jb.style.bottom='auto';jb.style.opacity=.8}else if(!half(t.clientX)&&lid==null){lid=t.identifier;lp={x:t.clientX,y:t.clientY}}}e.preventDefault()},{passive:false});
+ tc.addEventListener('touchmove',e=>{for(const t of e.changedTouches){if(t.identifier==jid){let dx=t.clientX-jo.x,dy=t.clientY-jo.y;const d=Math.hypot(dx,dy),m=Math.min(d,55);dx=d?dx/d*m:0;dy=d?dy/d*m:0;kn.style.transform=`translate(${dx}px,${dy}px)`;const nx=dx/55,ny=dy/55;jx=Math.abs(nx)>.15?nx:0;jy=Math.abs(ny)>.15?ny:0;jr=m>=54?1:0}
+  else if(t.identifier==lid&&playing&&!reading&&!frozen){yaw-=(t.clientX-lp.x)*.006;pitch=Math.max(-1.2,Math.min(1.2,pitch-(t.clientY-lp.y)*.006));lp={x:t.clientX,y:t.clientY}}}e.preventDefault()},{passive:false});
+ const up=e=>{for(const t of e.changedTouches){if(t.identifier==jid){jid=null;jx=jy=jr=0;kn.style.transform='';jb.style.left=jb.style.top=jb.style.bottom='';jb.style.opacity=''}if(t.identifier==lid)lid=null}};
+ tc.addEventListener('touchend',up);tc.addEventListener('touchcancel',up);
+ const bt=(id,dn,u)=>{const b=$(id);b.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();b.classList.add('on');dn()},{passive:false});['touchend','touchcancel'].forEach(n=>b.addEventListener(n,e=>{e.stopPropagation();b.classList.remove('on');u&&u()}))};
+ bt('bE',()=>reading?closeNote():interact());bt('bQ',decoy);bt('bR',()=>runB=1,()=>runB=0)})();
 cam.position.set(pl.x,1.6,pl.z);frame();
 const BOOT=`TOYBOX.EXE  v1.03   (c) 1987 MERRYWELL SOFTWARE
 > LOADING NORA.SAV ........ [CORRUPT]
@@ -207,6 +226,7 @@ TIPS: Toys follow sound. Throw a music box, then run. Listen for their footsteps
 
 Do not let the game finish compiling you.
 
-WASD move | MOUSE look | SHIFT run | E interact | Q throw decoy music box | headphones advised`;
+WASD move | MOUSE look | SHIFT run | E interact | Q throw decoy music box | headphones advised
+TOUCH: left thumb = move (push fully to sprint) | drag right side = look | buttons: E use, Q decoy, RUN`;
 let bi=0;const bti=setInterval(()=>{bi+=3;$('boot').textContent=BOOT.slice(0,bi);if(bi>=BOOT.length){clearInterval(bti);$('go').style.display='inline-block'}},25);$('boot').onclick=()=>bi=BOOT.length;
 </script></body></html>
